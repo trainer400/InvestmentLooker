@@ -5,24 +5,24 @@ import time
 import csv
 import pickle
 import os
-import tracker
+import simulator
 
 def create_new_log_file(name):
     # Create the file
     log = open(name, "wb")
 
     # Save a new void structure inside
-    voidState = tracker.InternalState()
+    voidState = simulator.InternalState()
     pickle.dump(voidState, log)
     log.close()
 
     # Print the action
     print("[INFO] Created new log file: " + str(name))
 
-def evaluate_investment(row, state : tracker.InternalState):
+def evaluate_investment(row, state : simulator.InternalState):
     # Gather the necessary data to evaluate the investments
-    precise_data = tracker.gather_data(row["COIN_NAME"], "1m")
-    granular_data = tracker.gather_data(row["COIN_NAME"], "30m")
+    precise_data = simulator.gather_data(row["COIN_NAME"], "1m")
+    granular_data = simulator.gather_data(row["COIN_NAME"], "30m")
     current_price = float(precise_data.c.iloc[len(precise_data.index) - 1])
 
     # Define the current date
@@ -37,8 +37,14 @@ def evaluate_investment(row, state : tracker.InternalState):
         # In case inside the user defined window, count it
         if date > current_date - dt.timedelta(hours=int(row["AVG_HRS"])):
             prices.append(float(granular_data.c.iloc[j]))
-            print(str(date) + " " + granular_data.c.iloc[j])
+            # print(str(date) + " " + granular_data.c.iloc[j])
     
+    avg_price = sum(prices) / len(prices)
+
+    # Evaluate the situation
+    action = simulator.make_decision(state, current_price, avg_price)
+    print(str(action) + " " + str(avg_price) + " " + str(current_price))
+
 
 
 # Create the notify window
