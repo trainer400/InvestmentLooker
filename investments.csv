@@ -1,0 +1,3 @@
+COIN_NAME,AVG_HRS,MIN_GAIN,BUY_TAX,SELL_TAX,LOG_NAME
+BTCEUR,48,5,0.9,0.9,low_percentage.inv
+BTCEUR,48,20,0.9,0.9,high_percentage.inv
