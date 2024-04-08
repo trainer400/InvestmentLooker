@@ -1,4 +1,5 @@
 from pathlib import Path
+import datetime as dt
 import tkinter
 import time
 import csv
@@ -21,9 +22,23 @@ def create_new_log_file(name):
 def evaluate_investment(row, state : tracker.InternalState):
     # Gather the necessary data to evaluate the investments
     precise_data = tracker.gather_data(row["COIN_NAME"], "1m")
-    granular_data = tracker.gather_data(row["COIN_NAME"], "1h")
+    granular_data = tracker.gather_data(row["COIN_NAME"], "30m")
     current_price = float(precise_data.c.iloc[len(precise_data.index) - 1])
 
+    # Define the current date
+    current_date = dt.datetime.fromtimestamp(precise_data.close_time.iloc[len(precise_data.index) - 1] / 1000.0)
+
+    # Compute the average
+    prices = []
+    for j in range(len(granular_data.index)):
+        # Data reference date
+        date = dt.datetime.fromtimestamp(granular_data.close_time.iloc[j] / 1000.0)
+
+        # In case inside the user defined window, count it
+        if date > current_date - dt.timedelta(hours=int(row["AVG_HRS"])):
+            prices.append(float(granular_data.c.iloc[j]))
+            print(str(date) + " " + granular_data.c.iloc[j])
+    
 
 
 # Create the notify window
