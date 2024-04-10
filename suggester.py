@@ -1,11 +1,13 @@
 from pathlib import Path
 import datetime as dt
+import matplotlib.pyplot as plt
 import tkinter
 import time
 import csv
 import pickle
 import os
 import simulator
+
 
 def create_new_log_file(name):
     # Create the file
@@ -19,32 +21,53 @@ def create_new_log_file(name):
     # Print the action
     print("[INFO] Created new log file: " + str(name))
 
-def evaluate_investment(config : simulator.Configuration, state : simulator.InternalState):
-    # Gather the necessary data to evaluate the investments
-    precise_data = simulator.gather_data(config.COIN_NAME, "1m")
-    granular_data = simulator.gather_data(config.COIN_NAME, "30m")
+
+def evaluate_investment(config: simulator.Configuration, state: simulator.InternalState, precise_data, granular_data):
+    # Take the last precise data price as current one
     current_price = float(precise_data.c.iloc[len(precise_data.index) - 1])
 
     # Define the current date
-    current_date = dt.datetime.fromtimestamp(precise_data.close_time.iloc[len(precise_data.index) - 1] / 1000.0)
+    current_date = dt.datetime.fromtimestamp(
+        precise_data.close_time.iloc[len(precise_data.index) - 1] / 1000.0)
 
     # Compute the average
     prices = []
     for j in range(len(granular_data.index)):
         # Data reference date
-        date = dt.datetime.fromtimestamp(granular_data.close_time.iloc[j] / 1000.0)
+        date = dt.datetime.fromtimestamp(
+            granular_data.close_time.iloc[j] / 1000.0)
 
         # In case inside the user defined window, count it
         if date > current_date - dt.timedelta(hours=int(config.AVG_HRS)):
             prices.append(float(granular_data.c.iloc[j]))
             # print(str(date) + " " + granular_data.c.iloc[j])
-    
+
     avg_price = sum(prices) / len(prices)
 
     # Evaluate the situation
     action = simulator.make_decision(state, config, current_price, avg_price)
-    print(str(action) + " " + str(avg_price) + " " + str(current_price))
+    # print(str(action) + " " + str(avg_price) + " " + str(current_price))
+    return action
 
+
+def show_ui(action: simulator.Action, precise_data, granular_data):
+    # Depending on the action, suggest to the user what to do
+    if action == simulator.Action.BUY:
+        # Graph the last price fluctuations
+        granular_data.c.astype('float').plot()
+
+        # Graph the buy action
+        plt.axvline(x=granular_data.index[len(
+            granular_data.index) - 1], color='b', label='BUY')
+
+        plt.show()
+
+        print("BUY")
+    elif action == simulator.Action.SELL:
+        # Graph the last price fluctuations
+        granular_data.c.astype('float').plot()
+
+        print("SELL")
 
 
 # Create the notify window
@@ -92,9 +115,14 @@ while True:
         config.BUY_TAX = float(row["BUY_TAX"])
         config.SELL_TAX = float(row["SELL_TAX"])
 
-        # Evaluate the current investment
-        evaluate_investment(config, state)
+        # Gather the necessary data to evaluate the investments
+        precise_data = simulator.gather_data(config.COIN_NAME, "1m")
+        granular_data = simulator.gather_data(config.COIN_NAME, "30m")
 
+        # Evaluate the current investment
+        action = evaluate_investment(
+            config, state, precise_data, granular_data)
+        show_ui(action, precise_data, granular_data)
 
     # Sleep for some time
     time.sleep(1)
