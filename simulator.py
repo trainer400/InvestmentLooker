@@ -5,16 +5,17 @@ import datetime as dt
 import matplotlib.pyplot as plt
 from enum import Enum
 
-# Days to take into consideration to compute the decision average value
-AVG_HRS = 48
-MIN_GAIN = 5 # [%]
-BUY_TAX = 0.9 # [%]
-SELL_TAX = 0.9 # [%]
-
 class Action(Enum):
     NONE = 0
     BUY = 1
     SELL = 2
+
+class Configuration:
+    COIN_NAME = ""
+    AVG_HRS = 24
+    MIN_GAIN = 3 # [%]
+    BUY_TAX = 0.6 # [%]
+    SELL_TAX = 0.6 # [%]
 
 class InternalState:
     current_day             = dt.datetime.now()
@@ -41,15 +42,15 @@ def gather_data(coin_name, interval):
 
     return data
 
-def make_decision(state : InternalState, current_price : float, avg_price : float):
+def make_decision(state : InternalState, config : Configuration,  current_price : float, avg_price : float):
     # The user has bitcoins in its account
     if state.current_bitcoins != 0:
         # If the expected gain is greater than the threshold, suggest to sell
-        if (1 - (state.last_purchase_price / current_price)) >  (MIN_GAIN / 100.0):
+        if (1 - (state.last_purchase_price / current_price)) >  (config.MIN_GAIN / 100.0):
             return Action.SELL
         elif(current_price/state.last_purchase_price) < 0.85: # If the price is dropping to much (over 15%) sell in loss
             return Action.SELL
-    elif current_price < (avg_price - avg_price * ((BUY_TAX + SELL_TAX) / 100.0)):
+    elif current_price < (avg_price - avg_price * ((config.BUY_TAX + config.SELL_TAX) / 100.0)):
         return Action.BUY
     
     return Action.NONE
@@ -58,8 +59,11 @@ def main():
     state = InternalState()
     state.current_balance = 50
 
-    precise_data = gather_data("BTCEUR", "1m")
-    granular_data = gather_data("BTCEUR", "1h")
+    config = Configuration()
+    config.COIN_NAME = "BTCEUR"
+
+    precise_data = gather_data(config.COIN_NAME, "1m")
+    granular_data = gather_data(config.COIN_NAME, "1h")
     current_price = float(precise_data.c.iloc[len(precise_data.index) - 1])
 
     granular_data.c.astype('float').plot()
@@ -75,7 +79,7 @@ def main():
         print("Day #" + str(days))
         
         # Set the current day that we are evaluating
-        current_day = (starting_time + dt.timedelta(hours=AVG_HRS))
+        current_day = (starting_time + dt.timedelta(hours=config.AVG_HRS))
         print("DAY: " + str(current_day))
 
         # Interrogate the algorithm on every current price for the day
@@ -100,7 +104,7 @@ def main():
 
                 avg_price = sum(prices) / len(prices)
 
-                action = make_decision(state, current_price, avg_price)
+                action = make_decision(state, config, current_price, avg_price)
 
                 if action == Action.BUY and state.current_balance > 0:
                     # Select the amount to buy
@@ -108,7 +112,7 @@ def main():
 
                     # Update the internal state
                     state.current_balance -= amount
-                    state.current_bitcoins += (amount - (BUY_TAX / 100.0) * amount) / current_price
+                    state.current_bitcoins += (amount - (config.BUY_TAX / 100.0) * amount) / current_price
 
                     # Update last purchase info
                     state.last_purchase_price = current_price
@@ -123,7 +127,7 @@ def main():
                 elif action == Action.SELL:
                     # Update the internal state
                     amount = state.current_bitcoins * current_price
-                    state.current_balance += amount - (SELL_TAX / 100.0) * amount
+                    state.current_balance += amount - (config.SELL_TAX / 100.0) * amount
                     state.current_bitcoins = 0
                     
                     # Draw sell line
@@ -140,7 +144,7 @@ def main():
     if state.current_bitcoins != 0:
         # Update the internal state
         amount = state.current_bitcoins * current_price
-        state.current_balance += amount - (SELL_TAX / 100.0) * amount
+        state.current_balance += amount - (config.SELL_TAX / 100.0) * amount
         state.current_bitcoins = 0
 
         # Report the sell action
