@@ -11,7 +11,7 @@ class Action(Enum):
     SELL = 2
 
 class Configuration:
-    COIN_NAME = ""
+    COIN_NAME = "BTCEUR"
     AVG_HRS = 24
     MIN_GAIN = 3 # [%]
     BUY_TAX = 0.6 # [%]
@@ -54,8 +54,9 @@ def make_decision(state : InternalState, config : Configuration,  current_price 
         return Action.BUY
     
     return Action.NONE
-        
-def main():
+
+# Simulation function that is called when this file is executed as main entrypoint
+def simulate():
     state = InternalState()
     state.current_balance = 50
 
@@ -156,4 +157,4 @@ def main():
     plt.show()
 
 if __name__ == "__main__":
-    main()
+    simulate()

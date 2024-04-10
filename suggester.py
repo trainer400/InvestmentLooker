@@ -19,10 +19,10 @@ def create_new_log_file(name):
     # Print the action
     print("[INFO] Created new log file: " + str(name))
 
-def evaluate_investment(row, state : simulator.InternalState):
+def evaluate_investment(config : simulator.Configuration, state : simulator.InternalState):
     # Gather the necessary data to evaluate the investments
-    precise_data = simulator.gather_data(row["COIN_NAME"], "1m")
-    granular_data = simulator.gather_data(row["COIN_NAME"], "30m")
+    precise_data = simulator.gather_data(config.COIN_NAME, "1m")
+    granular_data = simulator.gather_data(config.COIN_NAME, "30m")
     current_price = float(precise_data.c.iloc[len(precise_data.index) - 1])
 
     # Define the current date
@@ -35,14 +35,14 @@ def evaluate_investment(row, state : simulator.InternalState):
         date = dt.datetime.fromtimestamp(granular_data.close_time.iloc[j] / 1000.0)
 
         # In case inside the user defined window, count it
-        if date > current_date - dt.timedelta(hours=int(row["AVG_HRS"])):
+        if date > current_date - dt.timedelta(hours=int(config.AVG_HRS)):
             prices.append(float(granular_data.c.iloc[j]))
             # print(str(date) + " " + granular_data.c.iloc[j])
     
     avg_price = sum(prices) / len(prices)
 
     # Evaluate the situation
-    action = simulator.make_decision(state, current_price, avg_price)
+    action = simulator.make_decision(state, config, current_price, avg_price)
     print(str(action) + " " + str(avg_price) + " " + str(current_price))
 
 
@@ -84,8 +84,16 @@ while True:
         state = pickle.load(log)
         log.close()
 
+        # Populate the configuration
+        config = simulator.Configuration()
+        config.COIN_NAME = row["COIN_NAME"]
+        config.AVG_HRS = int(row["AVG_HRS"])
+        config.MIN_GAIN = float(row["MIN_GAIN"])
+        config.BUY_TAX = float(row["BUY_TAX"])
+        config.SELL_TAX = float(row["SELL_TAX"])
+
         # Evaluate the current investment
-        evaluate_investment(row, state)
+        evaluate_investment(config, state)
 
 
     # Sleep for some time
