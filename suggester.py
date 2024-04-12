@@ -1,7 +1,8 @@
 from pathlib import Path
 import datetime as dt
 import matplotlib.pyplot as plt
-import tkinter
+from tkinter import *
+from tkinter import messagebox
 import time
 import csv
 import pickle
@@ -9,13 +10,18 @@ import os
 import simulator
 
 
-def create_new_log_file(name):
+def create_new_log_file(name, config: simulator.Configuration):
     # Create the file
     log = open(name, "wb")
 
-    # Save a new void structure inside
-    voidState = simulator.InternalState()
-    pickle.dump(voidState, log)
+    # Create a new initial struct
+    initialState = simulator.InternalState()
+
+    # Populate the struct with the initial values
+    initialState.current_balance = config.INITIAL_INVESTMENT
+
+    # Save the struct
+    pickle.dump(initialState, log)
     log.close()
 
     # Print the action
@@ -59,19 +65,26 @@ def show_ui(action: simulator.Action, precise_data, granular_data):
         # Graph the buy action
         plt.axvline(x=granular_data.index[len(
             granular_data.index) - 1], color='b', label='BUY')
-
         plt.show()
+
+        # Ask the user to perform the operation
+        messagebox.askokcancel("prova", "prova")
 
         print("BUY")
     elif action == simulator.Action.SELL:
         # Graph the last price fluctuations
         granular_data.c.astype('float').plot()
 
+        # Draw sell line
+        plt.axvline(x=granular_data.index[len(
+            granular_data.index) - 1], color='g', label='SELL')
+        plt.show()
+
         print("SELL")
 
 
 # Create the notify window
-window = tkinter.Tk()
+window = Tk()
 window.wm_withdraw()
 
 # Wait 10 seconds to establish internet connection
@@ -94,10 +107,18 @@ while True:
 
     # Run the decision maker for every row
     for row in rows:
+        # Populate the configuration
+        config = simulator.Configuration()
+        config.COIN_NAME = row["COIN_NAME"]
+        config.INITIAL_INVESTMENT = row["INITIAL_INVESTMENT"]
+        config.AVG_HRS = int(row["AVG_HRS"])
+        config.MIN_GAIN = float(row["MIN_GAIN"])
+        config.BUY_TAX = float(row["BUY_TAX"])
+        config.SELL_TAX = float(row["SELL_TAX"])
 
         # Check that the log file exists
         if(not os.path.isfile(script_location / row["LOG_NAME"])):
-            create_new_log_file(row["LOG_NAME"])
+            create_new_log_file(row["LOG_NAME"], config)
 
             # Avoid the current step
             continue
@@ -107,22 +128,14 @@ while True:
         state = pickle.load(log)
         log.close()
 
-        # Populate the configuration
-        config = simulator.Configuration()
-        config.COIN_NAME = row["COIN_NAME"]
-        config.AVG_HRS = int(row["AVG_HRS"])
-        config.MIN_GAIN = float(row["MIN_GAIN"])
-        config.BUY_TAX = float(row["BUY_TAX"])
-        config.SELL_TAX = float(row["SELL_TAX"])
-
         # Gather the necessary data to evaluate the investments
         precise_data = simulator.gather_data(config.COIN_NAME, "1m")
-        granular_data = simulator.gather_data(config.COIN_NAME, "30m")
+        granular_data = simulator.gather_data(config.COIN_NAME, "1h")
 
         # Evaluate the current investment
         action = evaluate_investment(
             config, state, precise_data, granular_data)
-        show_ui(action, precise_data, granular_data)
+        show_ui(simulator.Action.BUY, precise_data, granular_data)
 
     # Sleep for some time
     time.sleep(1)
