@@ -14,7 +14,7 @@ class Action(Enum):
 
 class Configuration:
     COIN_NAME = "BTCEUR"
-    INITIAL_INVESTMENT = 0
+    INITIAL_INVESTMENT = 0.0
     AVG_HRS = 24
     MIN_GAIN = 3  # [%]
     BUY_TAX = 0.6  # [%]

@@ -18,7 +18,7 @@ def create_new_log_file(name, config: simulator.Configuration):
     initialState = simulator.InternalState()
 
     # Populate the struct with the initial values
-    initialState.current_balance = config.INITIAL_INVESTMENT
+    initialState.current_balance = float(config.INITIAL_INVESTMENT)
 
     # Save the struct
     pickle.dump(initialState, log)
@@ -56,7 +56,10 @@ def evaluate_investment(config: simulator.Configuration, state: simulator.Intern
     return action
 
 
-def show_ui(action: simulator.Action, precise_data, granular_data):
+def show_ui(action: simulator.Action, config: simulator.Configuration, state: simulator.InternalState, precise_data, granular_data):
+    result = False
+    current_price = float(precise_data.c.iloc[len(precise_data.index) - 1])
+
     # Depending on the action, suggest to the user what to do
     if action == simulator.Action.BUY:
         # Graph the last price fluctuations
@@ -68,9 +71,9 @@ def show_ui(action: simulator.Action, precise_data, granular_data):
         plt.show()
 
         # Ask the user to perform the operation
-        messagebox.askokcancel("prova", "prova")
+        result = messagebox.askokcancel("Buy operation", "Cost: {cost:.2f}\nPrice: {price:.2f}\nBTC: {btc:.6f}".format(
+            cost=state.current_balance, price=current_price, btc=(state.current_balance - config.BUY_TAX * state.current_balance)/current_price))
 
-        print("BUY")
     elif action == simulator.Action.SELL:
         # Graph the last price fluctuations
         granular_data.c.astype('float').plot()
@@ -80,7 +83,11 @@ def show_ui(action: simulator.Action, precise_data, granular_data):
             granular_data.index) - 1], color='g', label='SELL')
         plt.show()
 
-        print("SELL")
+        # Ask the user to perform the operation
+        result = messagebox.askokcancel("Sell operation", "Gain: {gain:.2f}\nPrice: {price:.2f}\nBTC: {btc:.6f}".format(
+            gain=(state.current_bitcoins - config.SELL_TAX * state.current_bitcoins) * current_price, price=current_price, btc=state.current_bitcoins))
+
+    return result
 
 
 # Create the notify window
@@ -117,7 +124,7 @@ while True:
         config.SELL_TAX = float(row["SELL_TAX"])
 
         # Check that the log file exists
-        if(not os.path.isfile(script_location / row["LOG_NAME"])):
+        if (not os.path.isfile(script_location / row["LOG_NAME"])):
             create_new_log_file(row["LOG_NAME"], config)
 
             # Avoid the current step
@@ -135,7 +142,8 @@ while True:
         # Evaluate the current investment
         action = evaluate_investment(
             config, state, precise_data, granular_data)
-        show_ui(simulator.Action.BUY, precise_data, granular_data)
+        show_ui(simulator.Action.BUY, config,
+                state, precise_data, granular_data)
 
     # Sleep for some time
     time.sleep(1)
