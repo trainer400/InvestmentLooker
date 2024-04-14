@@ -106,7 +106,7 @@ def main():
             print(f"[{state.timestamp}][INFO] Logged data")
 
             # Sleep for a minute
-            time.sleep(5)
+            time.sleep(60)
         except:
             print("[ERR] Caught unhandled exception during the process")
 
