@@ -66,17 +66,18 @@ def main():
             # Make decision
             decision = make_decision(state, config)
 
-            print(decision)
-
             # Actuate the decision
             if decision == Action.BUY:
                 # Buy coins
-                # buy_coin(client, config.COIN_NAME,
-                #          state.current_base_coin_availability)
+                buy_coin(client, config.COIN_NAME,
+                         state.current_base_coin_availability)
 
                 # Register the purchase details
                 state.last_buy_price = state.current_price
                 state.last_action = Action.BUY
+
+                print("[INFO][BUY] Bought coin: " +
+                      f"{state.current_base_coin_availability:.2f}" + " " + config.BASE_CURRENCY_NAME)
 
                 # Log the event
                 log_data(get_absolute_path(
@@ -84,10 +85,14 @@ def main():
 
             elif decision == Action.SELL:
                 # Sell coins
-                # sell_coin(client, config.COIN_NAME, state.current_coin_availability)
+                sell_coin(client, config.COIN_NAME,
+                          state.current_coin_availability)
 
                 # Register the sell details
                 state.last_action = Action.SELL
+
+                print("[INFO][SELL] Sold coin: " +
+                      f"{state.current_coin_availability:.8}" + " " + config.CURRENCY_NAME)
 
                 # Log the event
                 log_data(get_absolute_path(
