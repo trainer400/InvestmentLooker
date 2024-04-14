@@ -6,6 +6,7 @@ import os
 class UserConfiguration:
     COIN_NAME = ""
     CURRENCY_NAME = ""
+    BASE_CURRENCY = ""
     AVG_HRS = 0
     MIN_GAIN = 0.0
     BUY_TAX = 0.0
@@ -47,6 +48,7 @@ def read_user_configuration(path: str):
     config = UserConfiguration()
     config.COIN_NAME = row["COIN_NAME"]
     config.CURRENCY_NAME = row["CURRENCY_NAME"]
+    config.BASE_CURRENCY = row["BASE_CURRENCY"]
     config.AVG_HRS = int(row["AVG_HRS"])
     config.MIN_GAIN = float(row["MIN_GAIN"])
     config.BUY_TAX = float(row["BUY_TAX"])
