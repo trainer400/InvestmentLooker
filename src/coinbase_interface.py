@@ -28,6 +28,25 @@ def get_server_timestamp(client: RESTClient):
     return int(data["epochSeconds"])
 
 
+def get_avg_price(client: RESTClient, coin_name: str, avg_hrs: int):
+    current_time = get_server_timestamp(client)
+    delta_seconds = avg_hrs * 60 * 60
+    data = client.get_candles(
+        coin_name, current_time - delta_seconds, current_time, "THIRTY_MINUTE")
+
+    candles = data["candles"]
+
+    # Sum the average among open and close prices
+    result = 0.0
+    for candle in candles:
+        result += (float(candle["open"]) + float(candle["close"])) / 2.0
+
+    # Average the final result
+    result = result / len(candles)
+
+    return result
+
+
 def sell_coin(client: RESTClient, coin_name: str, amount: float) -> tuple:
     # Creates a random order ID to use a "primary key"
     order_id = random.randint(0, 1000000000)

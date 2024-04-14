@@ -57,4 +57,8 @@ def read_user_configuration(path: str):
     config.KEY_FILE_NAME = row["KEY_FILE_NAME"]
     config.LOG_NAME = row["LOG_NAME"]
 
+    if config.AVG_HRS >= 150 or config.AVG_HRS <= 0:
+        raise Exception(
+            "[ERR] Invalid AVG HRS time must be of interval (0:150)")
+
     return config

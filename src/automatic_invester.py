@@ -31,6 +31,7 @@ state.considered_avg = 0
 state.last_action = ""
 state.last_buy_price = 0
 
+# Update loop
 while True:
     # Update the internal state with fresh data
     state.timestamp = get_server_timestamp(client)
@@ -39,8 +40,8 @@ while True:
         client, config.CURRENCY_NAME)
     state.current_base_coin_availability = get_coin_availability(
         client, config.BASE_CURRENCY_NAME)
-
-    # TODO get considered avg
+    state.considered_avg = get_avg_price(
+        client, config.COIN_NAME, config.AVG_HRS)
 
     # Log the internal state
     log_data(get_absolute_path("../" + config.LOG_NAME), state)
