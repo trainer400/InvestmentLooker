@@ -21,14 +21,22 @@ class InternalState(LoggableObject):
 config = read_user_configuration("../invester_config.csv")
 client = RESTClient(key_file=get_absolute_path("../" + config.KEY_FILE_NAME))
 
+# Init the internal state
 state = InternalState()
+state.timestamp = 0
+state.current_price = 0
+state.current_coin_availability = 0
+state.current_base_coin_availability = 0
+state.considered_avg = 0
+state.last_action = ""
+state.last_buy_price = 0
 
 while True:
     # Update the internal state with fresh data
     state.timestamp = get_server_timestamp(client)
     state.current_price = get_current_price(client, config.COIN_NAME)
     state.current_coin_availability = get_coin_availability(
-        client, config.COIN_NAME)
+        client, config.CURRENCY_NAME)
     state.current_base_coin_availability = get_coin_availability(
         client, config.BASE_CURRENCY_NAME)
 

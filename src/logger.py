@@ -10,7 +10,8 @@ class LoggableObject:
         for var in variables:
             if not callable(getattr(self, var)) and not var.startswith("__"):
                 # Add the field into the result
-                result += str(variables[var]) + ","
+                content = vars(self)
+                result += str(content[str(var)]) + ","
 
         # Exclude the last coma
         result = result[0: len(result) - 1]
