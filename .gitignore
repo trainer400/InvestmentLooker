@@ -1,3 +1,5 @@
 *.inv
 __pycache__
 *.json
+*.log
+*.ev
