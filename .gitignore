@@ -1,2 +1,3 @@
 *.inv
 __pycache__
+*.json
