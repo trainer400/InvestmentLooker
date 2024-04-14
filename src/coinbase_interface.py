@@ -14,7 +14,11 @@ def get_coin_availability(client: RESTClient, currency_name: str):
 
     for account in data["accounts"]:
         if account["currency"] == currency_name:
-            return float(account["available_balance"]["value"])
+            amount = float(account["available_balance"]["value"])
+
+            # Process the amount to truncate instead of approximate
+            amount = math.trunc(amount * 100000000) / 100000000
+            return amount
 
     return 0
 
