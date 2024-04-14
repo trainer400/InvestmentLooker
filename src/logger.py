@@ -44,6 +44,7 @@ def log_data(path: str, object: LoggableObject):
     if os.stat(path).st_size == 0:
         # Write the header
         file.write(object.getCSVHeader())
+        print("[INFO] Created new log file: " + path)
 
     file.write(object.getCSVString())
     file.close()
