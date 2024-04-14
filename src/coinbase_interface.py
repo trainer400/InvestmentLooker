@@ -15,3 +15,8 @@ def get_coin_availability(client: RESTClient, currency_name: str):
             return float(account["available_balance"]["value"])
 
     return 0
+
+
+def get_server_timestamp(client: RESTClient):
+    data = client.get_unix_time()
+    return int(data["epochSeconds"])

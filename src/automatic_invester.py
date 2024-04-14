@@ -9,4 +9,6 @@ import time
 config = read_user_configuration("../invester_config.csv")
 client = RESTClient(key_file=get_absolute_path("../" + config.KEY_FILE_NAME))
 
-print(get_coin_availability(client, config.CURRENCY_NAME))
+while True:
+    print(get_server_timestamp(client))
+    time.sleep(5)
