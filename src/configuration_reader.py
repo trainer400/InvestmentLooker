@@ -14,6 +14,12 @@ class UserConfiguration:
     LOG_NAME = ""
 
 
+def get_absolute_path(path: str):
+    script_location = Path(__file__).absolute().parent
+    file_location = script_location / path
+    return str(file_location)
+
+
 def read_user_configuration(path: str):
     # Read the CSV configuration file
     script_location = Path(__file__).absolute().parent
