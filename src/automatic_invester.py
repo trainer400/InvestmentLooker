@@ -41,6 +41,10 @@ def save_internal_state(state: InternalState):
 
 
 def main():
+    # Set the std output to a log file
+    new_stdout = open(get_absolute_path("../console.log"), "w")
+    sys.stdout = new_stdout
+
     # Delay on startup
     time.sleep(10)
 
@@ -72,6 +76,7 @@ def main():
                 # Buy coins
                 action_result = buy_coin(client, config.COIN_NAME,
                                          state.current_base_coin_availability)
+
                 if action_result[0]:
                     # Register the purchase details
                     state.last_buy_price = state.current_price
@@ -112,6 +117,9 @@ def main():
             # Log the internal state
             log_data(get_absolute_path("../" + config.LOG_NAME), state)
             print(f"[{state.timestamp}][INFO] Logged data")
+
+            # Flush the console log
+            new_stdout.flush()
 
             # Sleep for a minute
             time.sleep(60)
