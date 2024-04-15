@@ -5,6 +5,7 @@ from investment_strategy import *
 from coinbase.rest import RESTClient
 import time
 import pickle
+import sys
 
 
 def load_internal_state():
@@ -69,34 +70,41 @@ def main():
             # Actuate the decision
             if decision == Action.BUY:
                 # Buy coins
-                buy_coin(client, config.COIN_NAME,
-                         state.current_base_coin_availability)
+                action_result = buy_coin(client, config.COIN_NAME,
+                                         state.current_base_coin_availability)
+                if action_result[0]:
+                    # Register the purchase details
+                    state.last_buy_price = state.current_price
+                    state.last_action = Action.BUY
 
-                # Register the purchase details
-                state.last_buy_price = state.current_price
-                state.last_action = Action.BUY
+                    print(f"[{state.timestamp}][INFO][BUY] Bought coin: " +
+                          f"{state.current_base_coin_availability:.2f}" + " " + config.BASE_CURRENCY_NAME)
 
-                print("[INFO][BUY] Bought coin: " +
-                      f"{state.current_base_coin_availability:.2f}" + " " + config.BASE_CURRENCY_NAME)
-
-                # Log the event
-                log_data(get_absolute_path(
-                    "../" + config.LOG_NAME + ".ev"), state)
+                    # Log the event
+                    log_data(get_absolute_path(
+                        "../" + config.LOG_NAME + ".ev"), state)
+                else:
+                    print(
+                        f"[{state.timestamp}][ERR][BUY] Error during buy transaction")
 
             elif decision == Action.SELL:
                 # Sell coins
-                sell_coin(client, config.COIN_NAME,
-                          state.current_coin_availability)
+                action_result = sell_coin(client, config.COIN_NAME,
+                                          state.current_coin_availability)
 
-                # Register the sell details
-                state.last_action = Action.SELL
+                if action_result[0]:
+                    # Register the sell details
+                    state.last_action = Action.SELL
 
-                print("[INFO][SELL] Sold coin: " +
-                      f"{state.current_coin_availability:.8}" + " " + config.CURRENCY_NAME)
+                    print(f"[{state.timestamp}][INFO][SELL] Sold coin: " +
+                          f"{state.current_coin_availability:.8}" + " " + config.CURRENCY_NAME)
 
-                # Log the event
-                log_data(get_absolute_path(
-                    "../" + config.LOG_NAME + ".ev"), state)
+                    # Log the event
+                    log_data(get_absolute_path(
+                        "../" + config.LOG_NAME + ".ev"), state)
+                else:
+                    print(
+                        f"[{state.timestamp}][ERR][SELL] Error during sell transaction")
 
             # Save the internal in case of a restart
             save_internal_state(state)
@@ -108,7 +116,8 @@ def main():
             # Sleep for a minute
             time.sleep(60)
         except:
-            print("[ERR] Caught unhandled exception during the process")
+            print(
+                f"[{state.timestamp}][ERR] Caught unhandled exception during the process")
 
 
 if __name__ == "__main__":
