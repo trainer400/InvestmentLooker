@@ -44,6 +44,7 @@ def main():
     # Set the std output to a log file
     new_stdout = open(get_absolute_path("../console.log"), "w")
     sys.stdout = new_stdout
+    sys.stderr = new_stdout
 
     # Delay on startup
     time.sleep(10)
