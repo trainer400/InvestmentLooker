@@ -14,6 +14,7 @@ class UserConfiguration:
     DOUBLE_STRATEGY = False
     KEY_FILE_NAME = ""
     LOG_NAME = ""
+    TEST_MODE = False
 
 
 def get_absolute_path(path: str):
@@ -56,6 +57,7 @@ def read_user_configuration(path: str):
     config.DOUBLE_STRATEGY = False if row["DOUBLE_STRATEGY"] == '0' else True
     config.KEY_FILE_NAME = row["KEY_FILE_NAME"]
     config.LOG_NAME = row["LOG_NAME"]
+    config.TEST_MODE = False if row["TEST_MODE"] == '0' else True
 
     if config.AVG_HRS >= 150 or config.AVG_HRS <= 0:
         raise Exception(

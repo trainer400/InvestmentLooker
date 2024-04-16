@@ -41,15 +41,21 @@ def save_internal_state(state: InternalState):
 
 
 def main():
-    # Set the std output to a log file
-    new_stdout = open(get_absolute_path("../console.log"), "w")
-    sys.stdout = new_stdout
-    sys.stderr = new_stdout
+    # Read the user configuration
+    config = read_user_configuration("../invester_config.csv")
 
     # Delay on startup
-    time.sleep(10)
+    if not config.TEST_MODE:
+        time.sleep(10)
 
-    config = read_user_configuration("../invester_config.csv")
+    # Change the standard output file if not in test mode
+    if not config.TEST_MODE:
+        # Set the std output to a log file
+        new_stdout = open(get_absolute_path("../console.log"), "w")
+        sys.stdout = new_stdout
+        sys.stderr = new_stdout
+
+    # Setup the API client
     client = RESTClient(key_file=get_absolute_path(
         "../" + config.KEY_FILE_NAME))
 
@@ -75,8 +81,12 @@ def main():
             # Actuate the decision
             if decision == Action.BUY:
                 # Buy coins
-                action_result = buy_coin(client, config.COIN_NAME,
-                                         state.current_base_coin_availability)
+                action_result = True
+                if config.TEST_MODE:
+                    print(f"[{state.timestamp}][INFO] Buy action in test mode")
+                # else:
+                #     action_result = buy_coin(client, config.COIN_NAME,
+                    #  state.current_base_coin_availability)
 
                 if action_result[0]:
                     # Register the purchase details
@@ -95,8 +105,12 @@ def main():
 
             elif decision == Action.SELL:
                 # Sell coins
-                action_result = sell_coin(client, config.COIN_NAME,
-                                          state.current_coin_availability)
+                action_result = True
+                if config.TEST_MODE:
+                    print(f"[{state.timestamp}][INFO] Sell action in test mode")
+                # else:
+                #     action_result = sell_coin(client, config.COIN_NAME,
+                #                               state.current_coin_availability)
 
                 if action_result[0]:
                     # Register the sell details
