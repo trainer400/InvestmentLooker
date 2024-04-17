@@ -48,10 +48,10 @@ def main():
     if not config.TEST_MODE:
         time.sleep(10)
 
+    new_stdout = open(get_absolute_path("../console.log"), "w")
     # Change the standard output file if not in test mode
     if not config.TEST_MODE:
         # Set the std output to a log file
-        new_stdout = open(get_absolute_path("../console.log"), "w")
         sys.stdout = new_stdout
         sys.stderr = new_stdout
 
@@ -81,12 +81,12 @@ def main():
             # Actuate the decision
             if decision == Action.BUY:
                 # Buy coins
-                action_result = True
+                action_result = (True, "")
                 if config.TEST_MODE:
                     print(f"[{state.timestamp}][INFO] Buy action in test mode")
-                # else:
-                #     action_result = buy_coin(client, config.COIN_NAME,
-                    #  state.current_base_coin_availability)
+                else:
+                    action_result = buy_coin(client, config.COIN_NAME,
+                                             state.current_base_coin_availability)
 
                 if action_result[0]:
                     # Register the purchase details
@@ -105,12 +105,12 @@ def main():
 
             elif decision == Action.SELL:
                 # Sell coins
-                action_result = True
+                action_result = (True, "")
                 if config.TEST_MODE:
                     print(f"[{state.timestamp}][INFO] Sell action in test mode")
-                # else:
-                #     action_result = sell_coin(client, config.COIN_NAME,
-                #                               state.current_coin_availability)
+                else:
+                    action_result = sell_coin(client, config.COIN_NAME,
+                                              state.current_coin_availability)
 
                 if action_result[0]:
                     # Register the sell details
@@ -138,9 +138,9 @@ def main():
 
             # Sleep for a minute
             time.sleep(60)
-        except:
+        except Exception as e:
             print(
-                f"[{state.timestamp}][ERR] Caught unhandled exception during the process")
+                f"[{state.timestamp}][ERR] Caught unhandled exception during the process: {str(e)}")
 
 
 if __name__ == "__main__":
