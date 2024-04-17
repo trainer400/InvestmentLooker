@@ -1,6 +1,5 @@
 from configuration_reader import *
 from coinbase_interface import *
-from automatic_invester import *
 from investment_strategy import *
 from coinbase.rest import RESTClient
 import time
@@ -73,7 +72,7 @@ def main():
             state.current_base_coin_availability = get_coin_availability(
                 client, config.BASE_CURRENCY_NAME)
             state.considered_avg = get_avg_price(
-                client, config.COIN_NAME, config.AVG_HRS)
+                client, config.COIN_NAME, config.AVG_HRS, state.timestamp)
 
             # Make decision
             decision = make_decision(state, config)

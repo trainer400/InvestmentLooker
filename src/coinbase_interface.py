@@ -28,8 +28,8 @@ def get_server_timestamp(client: RESTClient):
     return int(data["epochSeconds"])
 
 
-def get_avg_price(client: RESTClient, coin_name: str, avg_hrs: int):
-    current_time = get_server_timestamp(client)
+def get_avg_price(client: RESTClient, coin_name: str, avg_hrs: int, starting_timestamp: int):
+    current_time = starting_timestamp
     delta_seconds = avg_hrs * 60 * 60
     data = client.get_candles(
         coin_name, current_time - delta_seconds, current_time, "THIRTY_MINUTE")
