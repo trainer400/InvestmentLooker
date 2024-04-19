@@ -6,40 +6,33 @@ import datetime as dt
 import time
 
 INITIAL_INVESTMENT = 100
-SIMULATION_DAYS = 30
+LOG_FILE = "../logs/BTC-EUR-1YR.csv"
 
 
-def get_simulation_data(client: RESTClient, coin_name: str, starting_timestamp: int):
-    # A max of 300 samples can be requested
-    current_time = starting_timestamp
-    delta_seconds = 300 * 60
-    iterations = int(SIMULATION_DAYS * 24.0 * 60.0 / 300.0)
+def read_log_file(path: str) -> tuple[list, list]:
+    # Read the CSV log file
+    log_location = Path(__file__).absolute().parent
+    file_location = log_location / path
 
-    data_collection_ts = []
-    data_collection_price = []
+    # Verify the log file presence
+    if not os.path.exists(file_location):
+        raise Exception("[ERR] The log file does not exist")
 
-    counter = 0
-    while counter < iterations:
-        try:
-            print(
-                f"[INFO] Data gathering: {(100.0 * counter / iterations):.2f}%")
-            # Retrieve the data candles
-            data = client.get_candles(
-                coin_name, current_time - (iterations - counter) * delta_seconds, current_time - (iterations - counter - 1) * delta_seconds, "ONE_MINUTE")
+    # Open the file
+    file = file_location.open()
+    reader = csv.DictReader(file)
 
-            # Pack them from top to bottom (the candles are sorted such that the most recent time is the first element)
-            for i in range(len(data["candles"])):
-                candle = data["candles"][len(data["candles"]) - 1 - i]
-                data_collection_ts.append(
-                    dt.datetime.fromtimestamp(int(candle["start"])))
-                data_collection_price.append(float(candle["open"]))
+    # Read the content
+    data_ts = []
+    data_price = []
+    data_unix = []
+    for row in reader:
+        data_ts.append(int(row["timestamp"]))
+        data_price.append(float(row["price"]))
+        data_unix.append(dt.datetime.fromtimestamp(int(row["timestamp"])))
 
-            counter += 1
-        except Exception as e:
-            print(f"[ERR] Error retrieving simulation data: {str(e)}")
-            time.sleep(1)
-
-    return (data_collection_ts, data_collection_price)
+    file.close()
+    return (data_ts, data_unix, data_price)
 
 
 def main():
@@ -56,12 +49,11 @@ def main():
 
     # Gather the data
     print("[INFO] Gathering data")
-    (data_ts, data_price) = get_simulation_data(
-        client, config.COIN_NAME, get_server_timestamp(client))
+    (data_ts, data_date, data_price) = read_log_file(LOG_FILE)
 
     # Plot the data
     fig, ax = plt.subplots()
-    ax.plot(data_ts, data_price)
+    ax.plot(data_date, data_price)
     plt.show()
 
 
