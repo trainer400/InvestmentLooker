@@ -1,2 +1,5 @@
 logs/BTC-EUR-1YR.csv filter=lfs diff=lfs merge=lfs -text
 logs/ filter=lfs diff=lfs merge=lfs -text
+logs/BTC-EUR- filter=lfs diff=lfs merge=lfs -text
+logs/BTC-EUR-4YR.csv filter=lfs diff=lfs merge=lfs -text
+logs/SOL-EUR-4YR.csv filter=lfs diff=lfs merge=lfs -text
