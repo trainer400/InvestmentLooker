@@ -7,6 +7,7 @@ class Action(Enum):
     NONE = 0
     BUY = 1
     SELL = 2
+    SELL_LOSS = 3
 
 
 class InternalState(LoggableObject):
@@ -16,6 +17,7 @@ class InternalState(LoggableObject):
     current_base_coin_availability = 0
     considered_avg = 0
     last_action = Action.NONE
+    last_action_ts = 0
     last_buy_price = 0
 
 
@@ -25,7 +27,11 @@ def make_decision(state: InternalState, config: UserConfiguration):
         # If the expected gain is greater than the threshold, suggest to sell
         if (1 - (state.last_buy_price / state.current_price)) > (config.MIN_GAIN / 100.0):
             return Action.SELL
-    elif state.current_price < (state.considered_avg - state.considered_avg * ((config.BUY_TAX + config.SELL_TAX) / 100.0)):
+        if config.STOP_LOSS != 0 and (1 - state.considered_avg / state.last_buy_price) > (config.STOP_LOSS / 100.0):
+            return Action.SELL_LOSS
+    elif (state.last_action != Action.SELL_LOSS or state.timestamp - state.last_action_ts > config.SLEEP_DAYS_AFTER_LOSS * 24 * 60 * 60) and \
+            state.current_price < (state.considered_avg - state.considered_avg * ((config.BUY_TAX + config.SELL_TAX) / 100.0)) and \
+            state.current_base_coin_availability != 0:
         return Action.BUY
 
     return Action.NONE

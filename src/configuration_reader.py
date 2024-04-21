@@ -11,7 +11,8 @@ class UserConfiguration:
     MIN_GAIN = 0.0
     BUY_TAX = 0.0
     SELL_TAX = 0.0
-    DOUBLE_STRATEGY = False
+    STOP_LOSS = 0
+    SLEEP_DAYS_AFTER_LOSS = 0
     KEY_FILE_NAME = ""
     LOG_NAME = ""
     TEST_MODE = False
@@ -54,7 +55,8 @@ def read_user_configuration(path: str):
     config.MIN_GAIN = float(row["MIN_GAIN"])
     config.BUY_TAX = float(row["BUY_TAX"])
     config.SELL_TAX = float(row["SELL_TAX"])
-    config.DOUBLE_STRATEGY = False if row["DOUBLE_STRATEGY"] == '0' else True
+    config.STOP_LOSS = float(row["STOP_LOSS"])
+    config.SLEEP_DAYS_AFTER_LOSS = int(row["SLEEP_DAYS_AFTER_LOSS"])
     config.KEY_FILE_NAME = row["KEY_FILE_NAME"]
     config.LOG_NAME = row["LOG_NAME"]
     config.TEST_MODE = False if row["TEST_MODE"] == '0' else True

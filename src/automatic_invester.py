@@ -12,6 +12,7 @@ def load_internal_state():
     state = InternalState()
     state.last_action = Action.NONE
     state.last_buy_price = 0
+    state.last_action_ts = 0
 
     # If the file does not exist, return the default internal state
     if not os.path.exists(file_path):
@@ -90,19 +91,20 @@ def main():
                 if action_result[0]:
                     # Register the purchase details
                     state.last_buy_price = state.current_price
-                    state.last_action = Action.BUY
+                    state.last_action = decision
+                    state.last_action_ts = state.timestamp
 
                     print(f"[{state.timestamp}][INFO][BUY] Bought coin: " +
                           f"{state.current_base_coin_availability:.2f}" + " " + config.BASE_CURRENCY_NAME)
 
                     # Log the event
                     log_data(get_absolute_path(
-                        "../" + config.LOG_NAME + ".ev"), state)
+                        "../execution_logs/" + config.LOG_NAME + ".ev"), state)
                 else:
                     print(
                         f"[{state.timestamp}][ERR][BUY] Error during buy transaction")
 
-            elif decision == Action.SELL:
+            elif decision == Action.SELL or decision == Action.SELL_LOSS:
                 # Sell coins
                 action_result = (True, "")
                 if config.TEST_MODE:
@@ -113,14 +115,15 @@ def main():
 
                 if action_result[0]:
                     # Register the sell details
-                    state.last_action = Action.SELL
+                    state.last_action = decision
+                    state.last_action_ts = state.timestamp
 
                     print(f"[{state.timestamp}][INFO][SELL] Sold coin: " +
                           f"{state.current_coin_availability:.8}" + " " + config.CURRENCY_NAME)
 
                     # Log the event
                     log_data(get_absolute_path(
-                        "../" + config.LOG_NAME + ".ev"), state)
+                        "../execution_logs/" + config.LOG_NAME + ".ev"), state)
                 else:
                     print(
                         f"[{state.timestamp}][ERR][SELL] Error during sell transaction")
@@ -129,7 +132,8 @@ def main():
             save_internal_state(state)
 
             # Log the internal state
-            log_data(get_absolute_path("../" + config.LOG_NAME), state)
+            log_data(get_absolute_path(
+                "../execution_logs/" + config.LOG_NAME), state)
             print(f"[{state.timestamp}][INFO] Logged data")
 
             # Flush the console log

@@ -6,15 +6,16 @@ import datetime as dt
 import time
 
 INITIAL_INVESTMENT = 100
-LOG_FILE = "../logs/SOL-EUR-1YR.csv"
+LOG_FILE = "../logs/SOL-EUR-4YR.csv"
 COIN_NAME = "SOL-EUR"
 CURRENCY_NAME = "SOL"
 BASE_CURRENCY_NAME = "EUR"
-AVG_HRS = 48
+AVG_HRS = 120
 MIN_GAIN = 5
 BUY_TAX = 0.6
 SELL_TAX = 0.6
-DOUBLE_STRATEGY = 0
+STOP_LOSS = 0
+SLEEP_DAYS_AFTER_LOSS = 200
 
 
 def read_log_file(path: str) -> tuple[list, list]:
@@ -69,7 +70,8 @@ def main():
     config.MIN_GAIN = MIN_GAIN
     config.BUY_TAX = BUY_TAX
     config.SELL_TAX = SELL_TAX
-    config.DOUBLE_STRATEGY = DOUBLE_STRATEGY
+    config.STOP_LOSS = STOP_LOSS
+    config.SLEEP_DAYS_AFTER_LOSS = SLEEP_DAYS_AFTER_LOSS
 
     # Create an internal state to use during the simulation
     state = InternalState()
@@ -119,20 +121,22 @@ def main():
             state.current_coin_availability = (investment -
                                                (BUY_TAX / 100.0) * investment) / state.current_price
             state.current_base_coin_availability = 0
-            state.last_action = Action.BUY
+            state.last_action = decision
+            state.last_action_ts = state.timestamp
             ax.axvline(data_date[i], color="b", label="BUY")
 
             # Report the buy action
             print(
                 f"[{data_date[i]}]BUY action {config.BASE_CURRENCY_NAME}: {investment:.2f} {config.CURRENCY_NAME}: {state.current_coin_availability:.8f}")
 
-        elif decision == Action.SELL:
+        elif decision == Action.SELL or decision == Action.SELL_LOSS:
             investment = state.current_coin_availability
-            state.last_action = Action.SELL
+            state.last_action = decision
             state.current_base_coin_availability = state.current_coin_availability * state.current_price - \
                 (config.SELL_TAX / 100.0) * \
                 state.current_coin_availability * state.current_price
             state.current_coin_availability = 0
+            state.last_action_ts = state.timestamp
             ax.axvline(data_date[i], color="g", label="SELL")
 
             # Report the sell action
