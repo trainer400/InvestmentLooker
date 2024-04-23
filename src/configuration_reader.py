@@ -24,7 +24,7 @@ def get_absolute_path(path: str):
     return str(file_location)
 
 
-def read_user_configuration(path: str):
+def read_user_configurations(path: str) -> list[UserConfiguration]:
     # Read the CSV configuration file
     script_location = Path(__file__).absolute().parent
     file_location = script_location / path
@@ -45,24 +45,29 @@ def read_user_configuration(path: str):
     if len(rows) < 1:
         raise Exception("[ERR] No valid configuration")
 
-    # Populate the resulting configuration
-    row = rows[0]
-    config = UserConfiguration()
-    config.COIN_NAME = row["COIN_NAME"]
-    config.CURRENCY_NAME = row["CURRENCY_NAME"]
-    config.BASE_CURRENCY_NAME = row["BASE_CURRENCY_NAME"]
-    config.AVG_HRS = int(row["AVG_HRS"])
-    config.MIN_GAIN = float(row["MIN_GAIN"])
-    config.BUY_TAX = float(row["BUY_TAX"])
-    config.SELL_TAX = float(row["SELL_TAX"])
-    config.STOP_LOSS = float(row["STOP_LOSS"])
-    config.SLEEP_DAYS_AFTER_LOSS = int(row["SLEEP_DAYS_AFTER_LOSS"])
-    config.KEY_FILE_NAME = row["KEY_FILE_NAME"]
-    config.LOG_NAME = row["LOG_NAME"]
-    config.TEST_MODE = False if row["TEST_MODE"] == '0' else True
+    configs = []
 
-    if config.AVG_HRS >= 150 or config.AVG_HRS <= 0:
-        raise Exception(
-            "[ERR] Invalid AVG HRS time must be of interval (0:150)")
+    # Populate the resulting configurations
+    for row in rows:
+        config = UserConfiguration()
+        config.COIN_NAME = row["COIN_NAME"]
+        config.CURRENCY_NAME = row["CURRENCY_NAME"]
+        config.BASE_CURRENCY_NAME = row["BASE_CURRENCY_NAME"]
+        config.AVG_HRS = int(row["AVG_HRS"])
+        config.MIN_GAIN = float(row["MIN_GAIN"])
+        config.BUY_TAX = float(row["BUY_TAX"])
+        config.SELL_TAX = float(row["SELL_TAX"])
+        config.STOP_LOSS = float(row["STOP_LOSS"])
+        config.SLEEP_DAYS_AFTER_LOSS = int(row["SLEEP_DAYS_AFTER_LOSS"])
+        config.KEY_FILE_NAME = row["KEY_FILE_NAME"]
+        config.LOG_NAME = row["LOG_NAME"]
+        config.TEST_MODE = False if row["TEST_MODE"] == '0' else True
 
-    return config
+        if config.AVG_HRS >= 150 or config.AVG_HRS <= 0:
+            raise Exception(
+                "[ERR] Invalid AVG HRS time must be of interval (0:150)")
+
+        # Add config to the list
+        configs.append(config)
+
+    return configs
