@@ -133,7 +133,7 @@ def main():
 
             # Log the internal state
             log_data(get_absolute_path(
-                "../execution_logs/" + config.LOG_NAME), state)
+                "../execution_logs/" + config.LOG_NAME + ".log"), state)
             print(f"[{state.timestamp}][INFO] Logged data")
 
             # Flush the console log
