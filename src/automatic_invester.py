@@ -84,9 +84,8 @@ def main():
             if decision == Action.BUY:
                 # Buy coins
                 action_result = (True, "")
-                if config.TEST_MODE:
-                    print(f"[{state.timestamp}][INFO] Buy action in test mode")
-                else:
+
+                if not config.TEST_MODE:
                     action_result = buy_coin(client, config.COIN_NAME,
                                              state.current_base_coin_availability)
 
@@ -95,9 +94,6 @@ def main():
                     state.last_buy_price = state.current_price
                     state.last_action = decision
                     state.last_action_ts = state.timestamp
-
-                    print(f"[{state.timestamp}][INFO][BUY] Bought coin: " +
-                          f"{state.current_base_coin_availability:.2f}" + " " + config.BASE_CURRENCY_NAME)
 
                     # Log the event
                     log_data(get_absolute_path(
@@ -109,9 +105,8 @@ def main():
             elif decision == Action.SELL or decision == Action.SELL_LOSS:
                 # Sell coins
                 action_result = (True, "")
-                if config.TEST_MODE:
-                    print(f"[{state.timestamp}][INFO] Sell action in test mode")
-                else:
+
+                if not config.TEST_MODE:
                     action_result = sell_coin(client, config.COIN_NAME,
                                               state.current_coin_availability)
 
@@ -119,9 +114,6 @@ def main():
                     # Register the sell details
                     state.last_action = decision
                     state.last_action_ts = state.timestamp
-
-                    print(f"[{state.timestamp}][INFO][SELL] Sold coin: " +
-                          f"{state.current_coin_availability:.8}" + " " + config.CURRENCY_NAME)
 
                     # Log the event
                     log_data(get_absolute_path(
