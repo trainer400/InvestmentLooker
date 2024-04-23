@@ -4,9 +4,22 @@ import random
 import math
 
 
+def truncate(num: float, decimals: int) -> float:
+    result = num
+
+    # No negative numbers are accepted
+    decimals = abs(decimals)
+
+    # Multiply the value and use math truncate to approximate it
+    result = num * pow(10, decimals)
+    result = math.trunc(result)
+
+    return float(result) / pow(10, decimals)
+
+
 def get_current_price(client: RESTClient, coin_name: str):
     data = client.get_product(product_id=coin_name)
-    return float(data["price"])
+    return truncate(float(data["price"]), 2)
 
 
 def get_coin_availability(client: RESTClient, currency_name: str):
@@ -16,9 +29,8 @@ def get_coin_availability(client: RESTClient, currency_name: str):
         if account["currency"] == currency_name:
             amount = float(account["available_balance"]["value"])
 
-            # Process the amount to truncate instead of approximate
-            amount = math.trunc(amount * 100000000) / 100000000
-            return amount
+            # Approximate in defect the amount (8 decimals)
+            return truncate(amount, 8)
 
     return 0
 
@@ -44,7 +56,7 @@ def get_avg_price(client: RESTClient, coin_name: str, avg_hrs: int, starting_tim
     # Average the final result
     result = result / len(candles)
 
-    return result
+    return truncate(result, 2)
 
 
 def sell_coin(client: RESTClient, coin_name: str, amount: float) -> tuple:
@@ -52,7 +64,7 @@ def sell_coin(client: RESTClient, coin_name: str, amount: float) -> tuple:
     order_id = random.randint(0, 1000000000)
 
     # Process the amount to truncate instead of approximate
-    amount = math.trunc(amount * 100000000) / 100000000
+    amount = truncate(amount, 8)
 
     # Use formatting with 8 decimal values due to avoid scientific notation (8 values is the highest amount the coinbase supports)
     result = client.market_order_sell(
@@ -67,9 +79,9 @@ def buy_coin(client: RESTClient, coin_name: str, amount: float) -> tuple:
     order_id = random.randint(0, 1000000000)
 
     # Process the amount to truncate instead of approximate
-    amount = math.trunc(amount * 100) / 100
+    amount = truncate(amount, 2)
 
-    # Use formatting with 8 decimal values due to avoid scientific notation (2 values is the highest amount the coinbase supports)
+    # Use formatting with 2 decimal values due to avoid scientific notation (2 values is the highest amount the coinbase supports)
     result = client.market_order_buy(str(order_id), coin_name, f"{amount:.2f}")
 
     result_bool = bool(result["success"])

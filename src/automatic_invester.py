@@ -142,7 +142,11 @@ def main():
             new_stdout.flush()
 
             # Sleep for a minute
-            time.sleep(60)
+            if not config.TEST_MODE:
+                time.sleep(60)
+            else:
+                time.sleep(1)
+
         except Exception as e:
             print(
                 f"[{state.timestamp}][ERR] Caught unhandled exception during the process: {str(e)}")
