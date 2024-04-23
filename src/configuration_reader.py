@@ -24,7 +24,7 @@ def get_absolute_path(path: str):
     return str(file_location)
 
 
-def read_user_configurations(path: str) -> list[UserConfiguration]:
+def read_user_configurations(path: str):
     # Read the CSV configuration file
     script_location = Path(__file__).absolute().parent
     file_location = script_location / path
