@@ -7,8 +7,9 @@ import pickle
 import sys
 
 
-def load_internal_state():
-    file_path = get_absolute_path("../internal_state.log")
+def load_internal_state(config: UserConfiguration):
+    file_path = get_absolute_path(
+        "../internal_states/" + config.LOG_NAME + ".state")
     state = InternalState()
     state.last_action = Action.NONE
     state.last_buy_price = 0
@@ -29,8 +30,9 @@ def load_internal_state():
     return state
 
 
-def save_internal_state(state: InternalState):
-    file_path = get_absolute_path("../internal_state.log")
+def save_internal_state(config: UserConfiguration, state: InternalState):
+    file_path = get_absolute_path(
+        "../internal_states/" + config.LOG_NAME + ".state")
 
     # Create the file
     log = open(file_path, "wb")
@@ -60,7 +62,7 @@ def main():
         "../" + config.KEY_FILE_NAME))
 
     # Init the internal state
-    state = load_internal_state()
+    state = load_internal_state(config)
 
     # Update loop
     while True:
@@ -129,7 +131,7 @@ def main():
                         f"[{state.timestamp}][ERR][SELL] Error during sell transaction")
 
             # Save the internal in case of a restart
-            save_internal_state(state)
+            save_internal_state(config, state)
 
             # Log the internal state
             log_data(get_absolute_path(
