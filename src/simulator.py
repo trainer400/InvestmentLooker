@@ -10,12 +10,13 @@ LOG_FILE = "../logs/SOL-EUR-4YR.csv"
 COIN_NAME = "SOL-EUR"
 CURRENCY_NAME = "SOL"
 BASE_CURRENCY_NAME = "EUR"
-AVG_HRS = 120
-MIN_GAIN = 5
+AVG_HRS = 48
+MIN_GAIN = 8
 BUY_TAX = 0.6
 SELL_TAX = 0.6
-STOP_LOSS = 0
-SLEEP_DAYS_AFTER_LOSS = 200
+STOP_LOSS = 50
+SLEEP_DAYS_AFTER_LOSS = 30
+MAX_INVESTMENT = 200
 
 
 def read_log_file(path: str) -> tuple[list, list]:
@@ -116,23 +117,24 @@ def main():
 
         # Update the internal state
         if decision == Action.BUY:
-            investment = state.current_base_coin_availability
+            investment = min(
+                state.current_base_coin_availability, MAX_INVESTMENT)
             state.last_buy_price = state.current_price
             state.current_coin_availability = (investment -
                                                (BUY_TAX / 100.0) * investment) / state.current_price
-            state.current_base_coin_availability = 0
+            state.current_base_coin_availability -= investment
             state.last_action = decision
             state.last_action_ts = state.timestamp
             ax.axvline(data_date[i], color="b", label="BUY")
 
             # Report the buy action
             print(
-                f"[{data_date[i]}]BUY action {config.BASE_CURRENCY_NAME}: {investment:.2f} {config.CURRENCY_NAME}: {state.current_coin_availability:.8f}")
+                f"[{data_date[i]}]BUY action {config.BASE_CURRENCY_NAME}: {state.current_base_coin_availability:.2f} {config.CURRENCY_NAME}: {state.current_coin_availability:.8f}")
 
         elif decision == Action.SELL or decision == Action.SELL_LOSS:
             investment = state.current_coin_availability
             state.last_action = decision
-            state.current_base_coin_availability = state.current_coin_availability * state.current_price - \
+            state.current_base_coin_availability += state.current_coin_availability * state.current_price - \
                 (config.SELL_TAX / 100.0) * \
                 state.current_coin_availability * state.current_price
             state.current_coin_availability = 0
