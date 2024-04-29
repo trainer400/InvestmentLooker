@@ -5,3 +5,4 @@ __pycache__
 *.ev
 history.csv
 *.state
+execution_logs/*
