@@ -19,7 +19,7 @@ def truncate(num: float, decimals: int) -> float:
 
 def get_current_price(client: RESTClient, coin_name: str):
     data = client.get_product(product_id=coin_name)
-    return truncate(float(data["price"]), 2)
+    return truncate(float(data["price"]), 8)
 
 
 def get_coin_availability(client: RESTClient, currency_name: str):
@@ -56,7 +56,7 @@ def get_avg_price(client: RESTClient, coin_name: str, avg_hrs: int, starting_tim
     # Average the final result
     result = result / len(candles)
 
-    return truncate(result, 2)
+    return truncate(result, 8)
 
 
 def sell_coin(client: RESTClient, coin_name: str, amount: float) -> tuple:
