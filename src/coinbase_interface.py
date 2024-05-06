@@ -71,7 +71,7 @@ def sell_coin(client: RESTClient, coin_name: str, amount: float) -> tuple:
         str(order_id), coin_name, f"{amount:.8f}")
 
     result_bool = bool(result["success"])
-    return (result_bool, ("" if result_bool else result["error_response"]["error"]))
+    return (result_bool, ("" if result_bool else (result["error_response"]["error"] + "," + result["error_response"]["message"])))
 
 
 def buy_coin(client: RESTClient, coin_name: str, amount: float) -> tuple:
@@ -85,4 +85,4 @@ def buy_coin(client: RESTClient, coin_name: str, amount: float) -> tuple:
     result = client.market_order_buy(str(order_id), coin_name, f"{amount:.2f}")
 
     result_bool = bool(result["success"])
-    return (result_bool, ("" if result_bool else result["error_response"]["error"]))
+    return (result_bool, ("" if result_bool else (result["error_response"]["error"] + "," + result["error_response"]["message"])))
