@@ -89,7 +89,7 @@ def main():
     time.sleep(10)
 
     # Set the std output to a log file
-    new_stdout = open(get_absolute_path("../console.log"), "w")
+    new_stdout = open(get_absolute_path("../console.log"), "a")
     sys.stdout = new_stdout
     sys.stderr = new_stdout
 
@@ -147,7 +147,7 @@ def main():
                             "../execution_logs/" + config.LOG_NAME + ".ev"), state)
                     else:
                         print(
-                            f"[{state.timestamp}][ERR][BUY] Error during buy transaction")
+                            f"[{state.timestamp}][ERR][BUY] Error during buy transaction: {action_result[1]}")
 
                 elif decision == Action.SELL or decision == Action.SELL_LOSS:
                     # Sell coins
@@ -167,7 +167,7 @@ def main():
                             "../execution_logs/" + config.LOG_NAME + ".ev"), state)
                     else:
                         print(
-                            f"[{state.timestamp}][ERR][SELL] Error during sell transaction")
+                            f"[{state.timestamp}][ERR][SELL] Error during sell transaction: {action_result[1]}")
 
                 # Save the internal in case of a restart
                 save_internal_state(config, state)
