@@ -17,6 +17,18 @@ def truncate(num: float, decimals: int) -> float:
     return float(result) / pow(10, decimals)
 
 
+def get_increment_from_string(increment: str):
+    number = float(increment)
+
+    # The counter is incremented every time we need to remove a 0
+    counter = 0
+    while number != 1:
+        number *= 10
+        counter += 1
+
+    return counter
+
+
 def get_current_price(client: RESTClient, coin_name: str):
     data = client.get_product(product_id=coin_name)
     return truncate(float(data["price"]), 8)
@@ -60,13 +72,18 @@ def get_avg_price(client: RESTClient, coin_name: str, avg_hrs: int, starting_tim
 
 
 def sell_coin(client: RESTClient, coin_name: str, amount: float) -> tuple:
+    product_details = client.get_product(product_id=coin_name)
+
+    # Get maximum precision that the API accepts for the coin
+    increment = get_increment_from_string(product_details["base_increment"])
+
     # Creates a random order ID to use a "primary key"
     order_id = random.randint(0, 1000000000)
 
     # Process the amount to truncate instead of approximate
-    amount = truncate(amount, 8)
+    amount = truncate(amount, increment)
 
-    # Use formatting with 8 decimal values due to avoid scientific notation (8 values is the highest amount the coinbase supports)
+    # Use formatting with "increment" decimal values due to avoid scientific notation (8 values is the highest amount the coinbase supports)
     result = client.market_order_sell(
         str(order_id), coin_name, f"{amount:.8f}")
 
