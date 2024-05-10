@@ -11,6 +11,7 @@ class UserConfiguration:
     MIN_GAIN = 0.0
     BUY_TAX = 0.0
     SELL_TAX = 0.0
+    MIN_DELTA = 0.0
     STOP_LOSS = 0
     SLEEP_DAYS_AFTER_LOSS = 0
     KEY_FILE_NAME = ""
@@ -57,6 +58,7 @@ def read_user_configurations(path: str):
         config.MIN_GAIN = float(row["MIN_GAIN"])
         config.BUY_TAX = float(row["BUY_TAX"])
         config.SELL_TAX = float(row["SELL_TAX"])
+        config.MIN_DELTA = float(row["MIN_DELTA"])
         config.STOP_LOSS = float(row["STOP_LOSS"])
         config.SLEEP_DAYS_AFTER_LOSS = int(row["SLEEP_DAYS_AFTER_LOSS"])
         config.KEY_FILE_NAME = row["KEY_FILE_NAME"]
