@@ -4,7 +4,7 @@ import datetime as dt
 import csv
 import os
 
-LOG_FILE = "../execution_logs/ORN.log"
+LOG_FILE = "../execution_logs/AKT.log"
 
 
 def read_log_file(path: str) -> tuple[list, list, list, list]:
@@ -41,6 +41,7 @@ def main():
     (data_ts, data_unix, data_price, data_avg) = read_log_file(LOG_FILE)
 
     ax.plot(data_unix, data_price)
+    ax.plot(data_unix, data_avg, color="yellow")
     plt.show()
 
 
