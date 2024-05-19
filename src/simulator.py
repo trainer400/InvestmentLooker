@@ -6,18 +6,18 @@ import datetime as dt
 import time
 
 INITIAL_INVESTMENT = 100
-LOG_FILE = "../logs/SOL-EUR-4YR.csv"
-COIN_NAME = "SOL-EUR"
-CURRENCY_NAME = "SOL"
-BASE_CURRENCY_NAME = "EUR"
-AVG_HRS = 9
+LOG_FILE = "../logs/ETC-USD-1YR.csv"
+COIN_NAME = "ETC-USDC"
+CURRENCY_NAME = "ETC"
+BASE_CURRENCY_NAME = "USDC"
+AVG_HRS = 12
 MIN_GAIN = 8
 BUY_TAX = 0.6
 SELL_TAX = 0.6
-MIN_DELTA = 2
+MIN_DELTA = 3
 STOP_LOSS = 50
 SLEEP_DAYS_AFTER_LOSS = 30
-MAX_INVESTMENT = 200
+MAX_INVESTMENT = 100000
 
 
 def read_log_file(path: str) -> tuple[list, list]:
@@ -100,6 +100,10 @@ def main():
     state.considered_avg = compute_avg_price(
         data_ts, data_price, AVG_HRS, data_ts[starting_index])
 
+    # Accumulate average data
+    avg_price = []
+    avg_time = []
+
     # Run the simulator
     for i in range(starting_index, len(data_ts)):
         # print(
@@ -113,6 +117,10 @@ def main():
         # first of the previously considered ones and adding the new one
         state.considered_avg = ((state.considered_avg * starting_index) -
                                 data_price[i - starting_index] + data_price[i]) / starting_index
+
+        # Populate the average samples
+        avg_price.append(state.considered_avg)
+        avg_time.append(dt.datetime.fromtimestamp(state.timestamp))
 
         # Make the strategic decision
         decision = make_decision(state, config)
@@ -147,6 +155,8 @@ def main():
             print(
                 f"[{data_date[i]}]SELL action {config.BASE_CURRENCY_NAME}: {state.current_base_coin_availability:.2f} {config.CURRENCY_NAME}: {investment:.8f}")
 
+    # Plot also the average considered price
+    ax.plot(avg_time, avg_price, color="yellow")
     plt.show()
 
 
