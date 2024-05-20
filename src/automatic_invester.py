@@ -2,6 +2,7 @@ from configuration_reader import *
 from coinbase_interface import *
 from investment_strategy import *
 from coinbase.rest import RESTClient
+import datetime as dt
 import time
 import pickle
 import sys
@@ -147,7 +148,7 @@ def main():
                             "../execution_logs/" + config.LOG_NAME + ".ev"), state)
                     else:
                         print(
-                            f"[{state.timestamp}][ERR][BUY] Error during buy transaction: {action_result[1]}")
+                            f"[{state.timestamp}][{dt.datetime.fromtimestamp(state.timestamp)}][ERR][BUY] Error during buy transaction: {action_result[1]}")
 
                 elif decision == Action.SELL or decision == Action.SELL_LOSS:
                     # Sell coins
@@ -167,7 +168,7 @@ def main():
                             "../execution_logs/" + config.LOG_NAME + ".ev"), state)
                     else:
                         print(
-                            f"[{state.timestamp}][ERR][SELL] Error during sell transaction: {action_result[1]}")
+                            f"[{state.timestamp}][{dt.datetime.fromtimestamp(state.timestamp)}][ERR][SELL] Error during sell transaction: {action_result[1]}")
 
                 # Save the internal in case of a restart
                 save_internal_state(config, state)
@@ -175,14 +176,15 @@ def main():
                 # Log the internal state
                 log_data(get_absolute_path(
                     "../execution_logs/" + config.LOG_NAME + ".log"), state)
-                print(f"[{state.timestamp}][INFO] Logged data")
+                print(
+                    f"[{state.timestamp}][{dt.datetime.fromtimestamp(state.timestamp)}][INFO] Logged data")
 
                 # Flush the console log
                 new_stdout.flush()
 
             except Exception as e:
                 print(
-                    f"[{state.timestamp}][ERR] Caught unhandled exception during the process: {str(e)}")
+                    f"[{state.timestamp}][{dt.datetime.fromtimestamp(state.timestamp)}][ERR] Caught unhandled exception during the process: {str(e)}")
 
         # Sleep until next update
         time.sleep(60)
