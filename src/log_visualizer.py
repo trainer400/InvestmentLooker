@@ -5,6 +5,7 @@ import csv
 import os
 
 LOG_FILE = "../execution_logs/ETC.log"
+DELTA_BUY = 1.2
 
 
 def read_log_file(path: str) -> tuple[list, list, list, list]:
@@ -46,12 +47,20 @@ def main():
     ax.plot(data_unix, data_price)
     ax.plot(data_unix, data_avg, color="yellow")
 
+    # Generate buy/sell vertical lines
     for i in range(1, len(data_action)):
         if data_action[i] != data_action[i-1]:
             if "BUY" in data_action[i]:
                 ax.axvline(data_unix[i], color="b", label="BUY")
             elif "SELL" in data_action[i]:
                 ax.axvline(data_unix[i], color="g", label="SELL")
+
+    # Generate the threshold under which the invester buys
+    data_buy_thr = []
+    for i in range(len(data_avg)):
+        data_buy_thr.append(data_avg[i] - data_avg[i] * DELTA_BUY / 100.0)
+
+    ax.plot(data_unix, data_buy_thr, color="red")
 
     plt.show()
 
