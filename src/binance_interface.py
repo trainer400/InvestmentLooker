@@ -37,3 +37,21 @@ def get_server_timestamp(client: Spot):
 
     # From milliseconds to seconds (unix time)
     return int(data["serverTime"]) // 1000
+
+
+def get_avg_price(client: Spot, coin_name: str, avg_hrs: int, starting_timestamp: int):
+    # Number of seconds from beginning / number of seconds in 30 minutes
+    number_candles = (avg_hrs * 60 * 60) // (30 * 60)
+    data = client.klines(coin_name, "30m", limit=number_candles)
+
+    # Sum the average among open and close prices
+    result = 0.0
+    for candle in data:
+        open = candle[1]
+        close = candle[4]
+        result += (float(open) + float(close)) / 2.0
+
+    # Average the final result
+    result = result / len(data)
+
+    return truncate(result, 8)
